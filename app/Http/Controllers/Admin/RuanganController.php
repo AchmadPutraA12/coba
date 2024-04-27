@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ruangan;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,7 +14,11 @@ class RuanganController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Admin/Ruangan/Index');
+        $ruangan = Ruangan::all();
+
+        return Inertia::render('Admin/Produk/Index', [
+            'ruangan' => $ruangan,
+        ]);
     }
 
     /**
@@ -29,7 +34,20 @@ class RuanganController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required',
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Mengubah nama file agar tidak menyertakan /public di awal
+        $fotoPath = $request->file('foto')->storeAs('public/foto/ruangan', uniqid() . '.' . $request->file('foto')->getClientOriginalName());
+
+        // Menghapus 'public' dari path yang disimpan dalam database
+        $data['foto'] = str_replace('public/', '', $fotoPath);
+
+        Ruangan::create($data);
+
+        return back()->with('success', 'Produk berhasil disimpan');
     }
 
     /**

@@ -39,7 +39,11 @@ class ProdukController extends Controller
             'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $data['foto'] = $request->file('foto')->store('foto/produk');
+        // Mengubah nama file agar tidak menyertakan /public di awal
+        $fotoPath = $request->file('foto')->storeAs('public/foto/produk', uniqid() . '.' . $request->file('foto')->getClientOriginalName());
+
+        // Menghapus 'public' dari path yang disimpan dalam database
+        $data['foto'] = str_replace('public/', '', $fotoPath);
 
         Produk::create($data);
 
